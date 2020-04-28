@@ -1,0 +1,20 @@
+﻿  8数码.cpp
+C:\Users\To\source\repos\8数码\8数码.cpp(229,22): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(237,22): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(246,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(265,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(266,23): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(286,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(302,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(320,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(321,25): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(389,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(403,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(425,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(429,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(486,21): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(509,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(536,20): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(776,31): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\To\source\repos\8数码\8数码.cpp(842,33): warning C4018: “<”: 有符号/无符号不匹配
+  8数码.vcxproj -> C:\Users\To\source\repos\8数码\Debug\8数码.exe
