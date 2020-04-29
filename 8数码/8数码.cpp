@@ -20,7 +20,7 @@ struct State
 };
 
 //=========定义全局变量================
-string startFilePath = ".\\start1.txt"; // 默认输入文件路径，1、2、3步数依次增加，4不可达，5的目标状态有变化
+string startFilePath = ".\\start2.txt"; // 默认输入文件路径，1、2、3步数依次增加，4不可达，5的目标状态有变化
 string endFilePath = ".\\result.txt";// 默认输出文件路径
 
 const string ALGORITHM = "Algorithm"; // 算法选择
@@ -39,6 +39,7 @@ vector<State>pathOfSolution; // 解路径
 
 FILE* file;
 
+int testWeight = 0;
 
 //=========定义接口====================
 void showMenu(string const type);//显示菜单
@@ -68,9 +69,20 @@ double heuristicFunc4(State& s);
 double heuristicFunc5(State& s);
 double heuristicFunc6(State& s);
 
+double testHeuristicFunc3(State& s, int weight);
+void testAnalyse();
+void testFuncValue(State& s, int weight);
+void testGlobalOptimal(int weight);
+void testMain();
+
 //==================函数体===================
 int main()
 {
+	/*test*/
+	//testMain();
+	//return 0;
+	/*test*/
+	   
 	//若文件已经存在，则清除里面的内容，不存在就创建一个空文件
 	freopen_s(&file, endFilePath.c_str(), "w", stdout);
 	cout << "";
@@ -94,11 +106,15 @@ int main()
 		showMenu(ALGORITHM);
 		cin >> algorithmType;
 		if (algorithmType == 0) {
-			
-			//freopen(".\\default.txt", "w", stdout);
-			fclose(stdout);
-			break;
+			s0.vec.clear();
 
+			//清空状态
+			clearState();
+
+			allState.clear();
+
+			target.clear();
+			break;
 		}
 		switch (algorithmType)
 		{
@@ -147,6 +163,35 @@ int main()
 	} while (algorithmType!=0);
 }
 
+void testMain() {
+	
+	cout << "----------------------------------------" << endl;
+	cout << "|        Eight digit problem           |" << endl;
+	cout << "----------------------------------------" << endl;
+
+	//判定是否可达
+	if (!isReachable()) {
+		cout << "Target status not reachable!Exit！" << endl;
+		return ;
+	}
+	else cout << "Target status is reachable!\n" << endl;
+
+	for (int i = 1; i <= 10; i++) {
+
+		testWeight = i;
+
+		//计时
+		c_start = clock();
+		testGlobalOptimal(i);
+		c_end = clock();
+		//结果分析
+		testAnalyse();
+
+		//还原状态
+		clearState();
+	}
+}
+
 void showMenu(string const type) {
 	if (type == ALGORITHM) {
 		cout << "----------------------------------------" << endl;
@@ -164,7 +209,7 @@ void showMenu(string const type) {
 		cout << "-          3.heuristicFunc3            -" << endl;
 		cout << "-          4.heuristicFunc4            -" << endl;
 		cout << "-          5.heuristicFunc5            -" << endl;
-		cout << "-          6.heuristicFunc5            -" << endl;
+		cout << "-          6.heuristicFunc6            -" << endl;
 		cout << "-          0.Exit                      -" << endl;
 		cout << "----------------------------------------" << endl;
 		cout << "Please choose: ";
@@ -199,6 +244,12 @@ void funcValue(State& s)
 		break;
 	}
 	s.func = s.depth+ heuristic;
+}
+
+void testFuncValue(State& s,int weight)
+{
+	double heuristic = testHeuristicFunc3(s, weight);
+	s.func = s.depth + heuristic;
 }
 
 void clearState()
@@ -310,12 +361,17 @@ double heuristicFunc2(State& s)
 }
 
 double heuristicFunc3(State& s)
-{
+{	
 	/*
 		h(n)定义为每一对逆序数字乘以一个倍数，然后计算该状态与目标状态的差值。
 		这个倍数相当于一个权重，一般在2到10之间取值。
+	*/
+	//参见 testHeuristicFunc3(s, testWeight);
+
+	/*-----------         test1      -------------------------*/
+	/*
 		这里权重定义为：逆序数之差（如：3 1，其权重即为2）
-		h(n)=|该状态逆序数权重之和-目标状态逆序数权重之和|
+		h(n)=|该状态逆序数差值权重之和-目标状态逆序数差值权重之和|
 	*/
 	int inverseNum = 0;
 	int targetInverseNum = 0;
@@ -326,31 +382,64 @@ double heuristicFunc3(State& s)
 			if (target[i] > target[j] && target[i] && target[j]) targetInverseNum = targetInverseNum + target[i] - target[j];
 		}
 	}
-	//cout << inverseNum << " " << targetInverseNum << endl;
-	return abs(inverseNum-targetInverseNum);
+	//return abs(inverseNum - targetInverseNum);
+
+	/*-----------         test2      -------------------------*/
+	//return 2*abs(inverseNum-targetInverseNum);
+
+	/*-----------         test3      -------------------------*/
+	//return 3 * abs(inverseNum - targetInverseNum);
+
+	/*-----------         test4      -------------------------*/
+	//return 4 * abs(inverseNum - targetInverseNum);
+
+	/*-----------         test5      -------------------------*/
+	//return (s.depth + 1) * abs(inverseNum - targetInverseNum);
+	
+	/*-----------         test6      -------------------------*/
+	//return 0.5*(s.depth + 1) * abs(inverseNum - targetInverseNum);
+
+	/*-----------         test7      -------------------------*/
+	return 0.3*(s.depth + 1) * abs(inverseNum - targetInverseNum);
+}
+
+double testHeuristicFunc3(State& s,int weight)
+{
+	return weight*abs(getInverseNum(s.vec) - getInverseNum(target));
 }
 
 double heuristicFunc4(State& s)
 {
+	double differentNum = heuristicFunc1(s);
+	/*-----------         test1      -------------------------*/
 	/*
 		为克服仅计算数字逆序数字数目策略的局限，启发函数h(n)定义为位置不符数字
 		个数的总和与3倍的|该状态数字逆序数目-目标状态数字逆序数目|相加。
 		h(n)=错位数+3*|该状态数字逆序数目-目标状态数字逆序数目|
-	*/
-	double differentNum = heuristicFunc1(s);
-	double result = 3 * abs(getInverseNum(s.vec) - getInverseNum(target)) + differentNum;
+	*/	
+	//double result = 3 * abs(getInverseNum(s.vec) - getInverseNum(target)) + differentNum;
+	
+
+	/*-----------         test2      -------------------------*/
+	//h(n)=2*错位数+3*|该状态数字逆序数目-目标状态数字逆序数目|
+	//double result = 3 * abs(getInverseNum(s.vec) - getInverseNum(target)) + 2 * differentNum;
+
+	/*-----------         test3      -------------------------*/
+	//h(n) = 3*错位数 + 3 * | 该状态数字逆序数目 - 目标状态数字逆序数目 |
+	//double result =3*( abs(getInverseNum(s.vec) - getInverseNum(target)) + differentNum);
+
+	/*-----------         test4      -------------------------*/
+	//h(n)=错位数+ |该状态数字逆序数目-目标状态数字逆序数目|
+	double result = abs(getInverseNum(s.vec) - getInverseNum(target)) + differentNum;
+
 	return result;
 }
 
 double heuristicFunc5(State& s)
 {
 	/*-----------         test1      -------------------------*/
-	/*错位数+位置不符的数字移动到目标节点中对应位置的最短距离之和*/
-	//return heuristicFunc1(s)+heuristicFunc2(s);
-
-	/*-----------         test2      -------------------------*/
-	/* 3×该状态与目标状态相同的逆序数的对数+错位数*/
-	/*int count = 0;
+	/* h(n) = 错位数-该状态与目标状态相同的逆序数的对数 */
+	int count = 0;
 	for (int i = 0; i < s.vec.size() - 1; i++) {
 		for (int j = i + 1; j < s.vec.size(); j++)
 		{
@@ -360,28 +449,19 @@ double heuristicFunc5(State& s)
 			}			
 		}
 	}
-	return count*3 + heuristicFunc1(s);*/
-	//return 0.5*count + heuristicFunc2(s);// 2840 4904ms
-	//return 0.5 * count + 2*heuristicFunc2(s); // 2088 5942ms
+	//return heuristicFunc1(s)- count ;
+
+	/*-----------         test2      -------------------------*/
+	/* h(n) = 错位数-2×该状态与目标状态相同的逆序数的对数 */
+	//return heuristicFunc1(s)- count * 2 ;
 
 	/*-----------         test3      -------------------------*/
-	//h(n)=2*错位数+3*|该状态数字逆序数目-目标状态数字逆序数目|
-	double differentNum = heuristicFunc1(s);
-	double result =3* abs(getInverseNum(s.vec) - getInverseNum(target)) + 2*differentNum;
-	return result;
+	/* h(n) = 错位数-3×该状态与目标状态相同的逆序数的对数 */
+	//return heuristicFunc1(s)- count * 3 ;
 
 	/*-----------         test4      -------------------------*/
-	//h(n)=错位数+ |该状态数字逆序数目-目标状态数字逆序数目|
-	/*double differentNum = heuristicFunc1(s);
-	double result = abs(getInverseNum(s.vec) - getInverseNum(target)) + differentNum;
-	return result;*/
-
-	/*-----------         test5      -------------------------*/
-	//h(n) = 3*错位数 + 3 * | 该状态数字逆序数目 - 目标状态数字逆序数目 |
-	/*double differentNum = heuristicFunc1(s);
-	double result =3*( abs(getInverseNum(s.vec) - getInverseNum(target)) + differentNum);
-	return result;*/
-
+	/* h(n) = 错位数-4×该状态与目标状态相同的逆序数的对数 */
+	return heuristicFunc1(s)- count * 4 ;
 }
 
 double heuristicFunc6(State& s)
@@ -393,11 +473,7 @@ double heuristicFunc6(State& s)
 			funcValue += abs(i - findVecIndex(target, s.vec[i]));
 		}
 	}
-	return funcValue; // test1
-	
-	//return funcValue+heuristicFunc1(s); // test2
-
-	//return funcValue + heuristicFunc2(s); // test3
+	return funcValue;
 }
 
 bool isTarget(vector<int> vec)
@@ -460,7 +536,10 @@ void moveZero(State s, int direction)
 		newState.index = allState.size();
 		//for (auto x : s.vec) newState.vec.push_back(x);
 		newState.vec = s.vec;
+		
 		funcValue(newState);
+		//testFuncValue(newState, testWeight);
+		
 		newState.parentIndex = s.index;
 		newState.direction = direction;
 		allState.push_back(newState);
@@ -492,7 +571,6 @@ bool isStateExist(vector<int> newVec)
 	}
 	return false;
 }
-
 
 void showState(State s)
 {
@@ -576,10 +654,10 @@ void analyse()
 	
 	
 	if (tag == 0) { // 宽度优先
-		cout << "Arithmetic: Width First Arithmetic";
+		cout << "Arithmetic: Width First Arithmetic" << endl;
 	}
 	else { // 全局择优，启发式函数类型
-		cout << "Arithmetic: Global Optimal Arithmetic";
+		cout << "Arithmetic: Global Optimal Arithmetic.";
 		cout << "The valuation function is defined as: ";
 		switch (tag)
 		{
@@ -617,6 +695,54 @@ void analyse()
 
 	//同时将结果保存到文件
 	analyseForFile();
+}
+
+void testAnalyse() {
+	//输出解路径细节
+	for (auto x : pathOfSolution) {
+		showState(x);
+		cout << endl;
+	}
+	cout << "The length of solution path:  " << pathOfSolution.size() - 1 << endl;
+	cout << "Solution path:  ";
+	for (auto x : pathOfSolution) {
+		cout << x.index << " -> ";
+	}
+	cout << "over!" << endl;
+	cout << "Solution direction:  ";
+	for (auto x : pathOfSolution) {
+		if (x.index == 0) continue;
+		switch (x.direction)
+		{
+		case 1:
+			cout << "L -> "; break;
+		case 2:
+			cout << "U -> "; break;
+		case 3:
+			cout << "R -> "; break;
+		case 4:
+			cout << "D -> "; break;
+		default:
+			break;
+		}
+	}
+	cout << "over!" << endl;
+
+	//算法执行时间
+	//CLOCKS_PER_SEC展开成 std::clock_t 类型表达式，值等于每秒 std::clock() 所返回的时钟计次数（不必是编译时常量）。
+	double duration = (double)(c_end - c_start);
+	cout << "Algorithm execution time: " << 1000.0 * duration / CLOCKS_PER_SEC << " ms" << endl;
+
+
+	//权重
+	cout << "WEIGHT: " << testWeight << endl;
+
+	//初始状态与目标状态打印
+	cout << "Start state:\n";
+	showVec(s0.vec);
+	cout << "\nTarget state:\n";
+	showVec(target);
+	cout << endl;
 }
 
 void analyseForFile()
@@ -711,6 +837,7 @@ void globalOptimalMenu()
 		cin >> choose;
 		if (choose == 0) {
 			clearState();
+			tag = 0;
 			return;
 		}
 		else {
@@ -798,6 +925,73 @@ void globalOptimal()
 	return;
 }
 
+void testGlobalOptimal(int weight)
+{
+	/*
+	(1) 把初始节点S0放入OPEN表，f(S0)。
+	(2) 如果OPEN表为空，则问题无解，退出。
+	(3) 把OPEN表的第一个节点(记为节点n)取出放入CLOSED表。
+	(4) 考察节点n是否为目标节点。若是，则求得问题的解，退出。
+	(5) 若节点n不可扩展，则转第(2)步。
+	(6) 扩展节点n，用估计函数f(x)计算每个子节点的估价值，并为每个子节点配置指向父节点的指针，
+		把这些子节点都送入OPEN表中，然后对OPEN表中的全部节点按估价值从小到大的顺序进行排序，
+		然后转第(2)步
+	*/
+	testFuncValue(s0,weight);//计算s0的启发式函数值
+
+	//（1）
+	OPEN.push_back(s0);
+
+	//（2）
+	while (!OPEN.empty()) {
+		//（3）
+		State maxFunc = OPEN.front();
+		OPEN.pop_front();
+		CLOSED.push_back(maxFunc);
+
+		//（4）
+		if (isTarget(maxFunc.vec)) {
+			//保存解路径
+			int pathIndex = maxFunc.index;
+			do {
+				pathOfSolution.insert(pathOfSolution.begin(), allState[pathIndex]);
+				pathIndex = allState[pathIndex].parentIndex;
+			} while (pathIndex != 0);
+			pathOfSolution.insert(pathOfSolution.begin(), allState[0]);
+			return;
+		}
+
+		//（5）
+		int nowStateNum = allState.size();
+		extendState(maxFunc);
+		if (nowStateNum == allState.size()) { // 如果扩展后allState数量不变，则无法扩展
+			continue;
+		}
+
+		//（6）
+		for (int i = nowStateNum; i < allState.size(); i++) {
+			OPEN.push_back(allState[i]);
+		}
+
+		OPEN.sort(riseCmp);
+		/*
+		//不排序，只寻找估价函数最小值放到OPEN头，貌似还没有sort函数速度快
+		int minValue = INT_MAX;
+		auto minIndex=OPEN.begin();// 最小值的链表下标
+		for (auto it = OPEN.begin(); it != OPEN.end(); ++it) { //it为iterator迭代器
+			if ((*it).func < minValue) {
+				minValue = (*it).func;
+				minIndex = it;
+			}
+		}
+		State minState = *minIndex;
+		OPEN.erase(minIndex);
+		OPEN.insert(OPEN.begin(), minState);
+		*/
+	}
+	return;
+}
+
 void widthFirst()
 {
 	/*
@@ -855,7 +1049,6 @@ void widthFirst()
 					OPEN.push_back(allState[i]);
 				}
 			}
-		} while (!OPEN.empty()); 
-		
+		} while (!OPEN.empty()); 		
 	}
 }
